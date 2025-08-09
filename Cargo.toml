@@ -1,0 +1,20 @@
+[package]
+name = "wallet_generator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+secp256k1 = { version = "0.31", features = ["rand"] }
+rand = "0.9.1"
+sha3 = "0.10"
+sha2 = "0.10"
+bs58 = "0.5"
+rayon = "1.8"
+hex = "0.4.3"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
