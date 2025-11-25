@@ -1,95 +1,101 @@
-# TRON Wallet Address Generator
+# TRON Wallet Generator (CPU Optimized) ⚡
+
+High-performance TRON vanity address generator optimized for modern multi-core CPUs.
+This tool generates TRON addresses and searches for a specific **suffix** (ending characters).
 
 [![Built with Rust](https://img.shields.io/badge/Built%20with-Rust-orange?logo=rust)](https://www.rust-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This Rust tool generates secure TRON addresses until it finds one matching your specified suffix. It supports both case-sensitive and case-insensitive searches, with parallel processing for maximum speed.
+## 🚀 Performance
 
-## Features
+- **Speed**: Uses `secp256k1` C-library bindings for maximum elliptic curve performance.
+- **Parallelism**: Automatically detects and utilizes all available CPU cores.
+- **Efficiency**: Minimized memory allocations and atomic contention.
+- **Reporting**: Provides status updates every 1 minute.
 
-- 🚀 Multi-threaded search using Rayon for parallel processing
-- 🔑 Secure key generation with `secp256k1` and OS-level RNG
-- ⚙️ Case-sensitive or case-insensitive search modes
-- 📦 Compiled binary optimized with `strip` and `upx`
-- 🌐 Generates standard TRON addresses (starting with `T`)
-- 🔒 Self-contained executable with no runtime dependencies
+## 📋 Prerequisites
 
-## Prerequisites
+- **Rust**: Latest stable version ([Install Rust](https://rustup.rs/))
+- **OS**: macOS, Linux, or Windows (Optimized for macOS Apple Silicon)
 
-- Rust toolchain (latest stable version)
-- `upx` (for binary compression - optional)
+## 🔧 Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/vlasenkofedor/wallet_generator.git
+   cd wallet_generator
+   ```
+
+2. **Build for Maximum Performance:**
+   Use the `target-cpu=native` flag to enable CPU-specific optimizations (AVX2, NEON, etc.).
+
+   ```bash
+   RUSTFLAGS="-C target-cpu=native" cargo build --release
+   ```
+
+## 📖 Usage
+
+The tool accepts two arguments:
+
+1. `SUFFIX`: The string you want your address to end with.
+2. `CASE_SENSITIVE` (Optional): `true` or `false` (default: `false`).
+
+### Basic Command
 
 ```bash
-# Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# Install UPX (Ubuntu/Debian)
-sudo apt install upx -y
-
-# For other systems see: https://upx.github.io
+./target/release/wallet_generator <SUFFIX> [CASE_SENSITIVE]
 ```
-# Installation & Compilation
+
+### Examples
+
+#### 1. Simple Suffix Search (Case-Insensitive)
+
+Find an address ending with "888". This will match `...888`, `...888`, etc.
+
 ```bash
-# 1. Clone repository
-git clone https://github.com/vlasenkofedor/wallet_generator.git
-cd wallet_generator-generator
-```
-```bash
-# 2. Build with optimizations (automatically strips and compresses binary)
-chmod +x build.sh
-./build.sh
-```
-```bash
-# 3. Run directly from build directory
-./target/release/wallet_generator <suffix>
-```
-```bash
-# Or install system-wide (optional)
-sudo cp target/release/wallet_generator /usr/local/bin
-```
-## Alternative Manual Build
-```bash
-cargo build --release
-strip target/release/wallet_generator
-upx --best target/release/wallet_generator
-```
-# Usage
-```bash
-# Example:
-./wallet_generator <suffix> [case-sensitive]
-```
-- suffix: The ending pattern you want to find (alphanumeric)
-- case-sensitive (optional): Set to true for exact case matching
-
-## Examples
-```bash
-# Case-insensitive search (matches ABC, Abc, abc, etc.):
-./wallet_generator Abc true
-```
-```bash
-# Search for special patterns (must be at end of address):
-./wallet_generator 123
-./wallet_generator Wallet
-./wallet_generator FaNcY
-```
-## Sample Output
-```text
-Searching for TRON address ending with: 'Test'
-Case sensitivity: disabled
-
-Found matching address!
-Address: TYvmc4kfZ4E3w2aFgKcQ9qj8dR7sTest
-Private Key: 3d8f1b0e7ac0c4b2e8d9a6c5f3e1d8a7b0e4f2c1a9d3b6e8f7c4a5d2e1b0f3e
+./target/release/wallet_generator 888
 ```
 
-# Security
-Private keys are generated using cryptographically secure RNG (OS entropy source)
+#### 2. Case-Sensitive Suffix
 
-Keys are never stored, transmitted, or logged
+Find an address ending exactly with "Love". Matches `...Love` but NOT `...love` or `...LOVE`.
 
-Generated keys should be immediately imported to a secure wallet
+```bash
+./target/release/wallet_generator Love true
+```
 
-Always verify addresses on testnet before mainnet use
+#### 3. Long Suffix (Harder to find)
 
-# License
-License: MIT - [see](https://opensource.org/licenses/MIT) LICENSE file for details
+Find an address ending with "Crypto".
+
+```bash
+./target/release/wallet_generator Crypto
+```
+
+## 💡 How it Works
+
+1. **Key Generation**: Generates a random private key.
+2. **Public Key Derivation**: Derives the public key using Secp256k1.
+3. **Hashing**: Applies Keccak-256 to the public key.
+4. **Address Formation**: Adds the `0x41` prefix and calculates the double SHA-256 checksum.
+5. **Base58 Encoding**: Encodes the result to get the final TRON address (e.g., `T...`).
+6. **Suffix Check**: Checks if the generated address ends with your desired suffix.
+
+## ⚠️ Important Notes
+
+- **Prefix vs Suffix**: This tool currently searches for a **SUFFIX** (the end of the address). All TRON addresses start with `T`.
+- **Performance**: The search time increases exponentially with the length of the suffix.
+  - 3 chars: Instant
+  - 4 chars: Seconds
+  - 5 chars: Minutes
+  - 6 chars: Hours/Days
+- **Security**: Private keys are generated securely using OS entropy and are **never** stored or transmitted. They are only displayed when a match is found.
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## 📄 License
+
+MIT License
